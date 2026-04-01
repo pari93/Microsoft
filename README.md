@@ -1,6 +1,2 @@
 # hello-world
-Yolo
-
-Are you yolo ?
-
-Coz am yolo
+Hello again from 2026
