@@ -1,0 +1,1 @@
+This has all Microsoft Fabric related offerings.
