@@ -2,6 +2,7 @@ import os
 import time
 import json
 import random
+from datetime import datetime, timezone
 from azure.iot.device import IoTHubDeviceClient, MethodResponse
 
 # Put your device connection string here (or use env var)
@@ -62,6 +63,7 @@ def main():
 
         telemetry = {
             "sensorId": "temp-sensor-001",
+            "timestamp": datetime.now(timezone.utc).isoformat(),
             "temperature": round(CURRENT_TEMPERATURE, 2)
         }
         client.send_message(json.dumps(telemetry))
