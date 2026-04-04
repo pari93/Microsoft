@@ -4,12 +4,11 @@ import json
 import random
 from datetime import datetime, timezone
 from azure.iot.device import IoTHubDeviceClient, MethodResponse
+from dotenv import load_dotenv
+load_dotenv()
 
 # Put your device connection string here (or use env var)
-DEVICE_CONNECTION_STRING = os.getenv(
-    "DEVICE_CONNECTION_STRING",
-    "HostName=<your-hub>.azure-devices.net;DeviceId=temp-sensor-001;SharedAccessKey=<key>"
-)
+DEVICE_CONNECTION_STRING = os.getenv("DEVICE_CONNECTION_STRING")
 
 TARGET_TEMPERATURE = 24.0  # default target from "cloud"
 CURRENT_TEMPERATURE = 24.0
