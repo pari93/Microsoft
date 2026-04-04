@@ -1,6 +1,7 @@
 import datetime
 import logging
 import os
+from urllib import response
 
 import azure.functions as func
 
@@ -25,7 +26,7 @@ def ClosedLoopController(mytimer: func.TimerRequest) -> None:
     IOTHUB_CONN = os.getenv("IOTHUB_CONNECTION_STRING")
     ADT_URL = os.getenv("ADT_URL")
 
-    DEVICE_ID = "mySimulatedDevice"
+    DEVICE_ID = "temp-sensor-001"
 
     # ----------------------------------------------------------------------
     # 2. Query ADX for last 5 minutes of temperature data
@@ -35,16 +36,21 @@ def ClosedLoopController(mytimer: func.TimerRequest) -> None:
         client = KustoClient(kcsb)
 
         query = """
-        SensorData
-        | where Timestamp > ago(5m)
-        | summarize avg(Temperature)
+        TemperatureReadings
+        | where timestamp > ago(5m)
+        | summarize avg(temperature)
         """
 
         response = client.execute(ADX_DB, query)
-        avg_temp = None
 
-        for row in response.primary_results[0]:
-            avg_temp = row[0]
+        # Extract the first row
+        rows = response.primary_results[0]
+        if len(rows) == 0:
+            logging.warning("No telemetry found in ADX for the last 5 minutes.")
+            return
+
+        row = rows[0]
+        avg_temp = row["avg_temperature"]
 
         logging.info(f"Average temperature from ADX: {avg_temp}")
 

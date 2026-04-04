@@ -60,6 +60,9 @@ def main():
         # Simple physics: move current temperature slowly toward target
         CURRENT_TEMPERATURE += (TARGET_TEMPERATURE - CURRENT_TEMPERATURE) * 0.1
 
+        # Add natural random drift to simulate real-world fluctuations
+        CURRENT_TEMPERATURE += random.uniform(-0.3, 0.3)    
+
         telemetry = {
             "sensorId": "temp-sensor-001",
             "timestamp": datetime.now(timezone.utc).isoformat(),

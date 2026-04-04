@@ -1,0 +1,17 @@
+{
+  "@id": "dtmi:example:Device;1",
+  "@type": "Interface",
+  "displayName": "Device",
+  "contents": [
+    {
+      "@type": "Property",
+      "name": "mode",
+      "schema": "string"
+    },
+    {
+      "@type": "Property",
+      "name": "targetTemperature",
+      "schema": "double"
+    }
+  ]
+}
