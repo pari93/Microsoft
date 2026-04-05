@@ -68,6 +68,11 @@ def ClosedLoopController(mytimer: func.TimerRequest) -> None:
     COOLING_THRESHOLD = 28.0
     HEATING_THRESHOLD = 18.0
 
+    # Handle NaN or missing data
+    if avg_temp is None or str(avg_temp).lower() == "nan":
+        logging.warning("No valid temperature data available yet. Waiting for telemetry...")
+        return
+
     if avg_temp > COOLING_THRESHOLD:
         new_mode = "COOLING_ON"
         target_temp = 22
