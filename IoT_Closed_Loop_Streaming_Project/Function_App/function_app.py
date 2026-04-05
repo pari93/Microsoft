@@ -37,7 +37,7 @@ def ClosedLoopController(mytimer: func.TimerRequest) -> None:
 
         query = """
         TemperatureReadings
-        | where timestamp > ago(5m)
+        | where timestamp > ago(1m)
         | summarize avg(temperature)
         """
 

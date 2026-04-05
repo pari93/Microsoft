@@ -10,13 +10,15 @@ load_dotenv()
 # Put your device connection string here (or use env var)
 DEVICE_CONNECTION_STRING = os.getenv("DEVICE_CONNECTION_STRING")
 
-TARGET_TEMPERATURE = 24.0  # default target from "cloud"
-CURRENT_TEMPERATURE = 24.0
+TARGET_TEMPERATURE = 24.0  # Desired temperature
+CURRENT_TEMPERATURE = 35.0 # Current temperature of the device [Change to >28 to see cooling in action or <18 to see heating in action immediately in the terminal logs]
 
+# Create a client that can send telemetry and receive twin updates
 def create_client():
     client = IoTHubDeviceClient.create_from_connection_string(DEVICE_CONNECTION_STRING)
     return client
 
+# After receiving the new temperature set device's internal target temperature
 def handle_twin_patch(patch):
     global TARGET_TEMPERATURE
     if "targetTemperature" in patch:
@@ -41,6 +43,7 @@ def handle_direct_method(request):
 def main():
     global CURRENT_TEMPERATURE, TARGET_TEMPERATURE
 
+    #Connect device to IoT Hub
     client = create_client()
     client.connect()
 
@@ -61,7 +64,7 @@ def main():
         CURRENT_TEMPERATURE += (TARGET_TEMPERATURE - CURRENT_TEMPERATURE) * 0.1
 
         # Add natural random drift to simulate real-world fluctuations
-        CURRENT_TEMPERATURE += random.uniform(-0.3, 0.3)    
+        CURRENT_TEMPERATURE += random.uniform(-0.3, 0.3) # Set it to (-5.0, 5.0) for more quicker fluctuations so see changes quicker in terminal logs
 
         telemetry = {
             "sensorId": "temp-sensor-001",
