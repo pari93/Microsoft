@@ -14,7 +14,7 @@ from azure.digitaltwins.core import DigitalTwinsClient
 app = func.FunctionApp()
 
 
-@app.schedule(schedule="0 */1 * * * *", arg_name="mytimer", run_on_startup=False, use_monitor=False)
+@app.schedule(schedule="*/30 * * * * *", arg_name="mytimer", run_on_startup=False, use_monitor=False)
 def ClosedLoopController(mytimer: func.TimerRequest) -> None:
     logging.info("ClosedLoopController triggered")
 
@@ -37,20 +37,21 @@ def ClosedLoopController(mytimer: func.TimerRequest) -> None:
 
         query = """
         TemperatureReadings
-        | where timestamp > ago(1m)
-        | summarize avg(temperature)
+        | where timestamp > ago(3m)
+        | summarize avg_temp = avg(temperature)
         """
 
         response = client.execute(ADX_DB, query)
 
         # Extract the first row
-        rows = response.primary_results[0]
+        table = response.primary_results[0]
+        rows = table.rows
         if len(rows) == 0:
-            logging.warning("No telemetry found in ADX for the last 5 minutes.")
+            logging.warning("No telemetry found in ADX for the last 3 minutes.")
             return
 
         row = rows[0]
-        avg_temp = row["avg_temperature"]
+        avg_temp = row["avg_temp"]
 
         logging.info(f"Average temperature from ADX: {avg_temp}")
 
@@ -58,8 +59,8 @@ def ClosedLoopController(mytimer: func.TimerRequest) -> None:
         logging.error(f"ADX query failed: {ex}")
         return
 
-    if avg_temp is None:
-        logging.warning("No telemetry found in ADX for the last 5 minutes.")
+    if avg_temp is None or str(avg_temp).lower() == "nan":
+        logging.warning("No valid temperature data available yet. Waiting for telemetry...")
         return
 
     # ----------------------------------------------------------------------

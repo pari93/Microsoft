@@ -59,12 +59,17 @@ def main():
 
     print("[DEVICE] Connected. Sending telemetry...")
 
+    start_time = time.time()
     while True:
-        # Simple physics: move current temperature slowly toward target
-        CURRENT_TEMPERATURE += (TARGET_TEMPERATURE - CURRENT_TEMPERATURE) * 0.1
-
-        # Add natural random drift to simulate real-world fluctuations
-        CURRENT_TEMPERATURE += random.uniform(-0.3, 0.3) # Set it to (-5.0, 5.0) for more quicker fluctuations so see changes quicker in terminal logs
+        if time.time() - start_time < 180:
+            CURRENT_TEMPERATURE += random.uniform(-0.1, 0.1)
+        else:
+            if TARGET_TEMPERATURE is not None:
+                # Move current temperature slowly toward target
+                CURRENT_TEMPERATURE += (TARGET_TEMPERATURE - CURRENT_TEMPERATURE) * 0.1
+            else:    
+                # No heating/cooling — natural drift only
+                CURRENT_TEMPERATURE += random.uniform(-0.2, 0.2) # Set it to (-5.0, 5.0) for more quicker fluctuations so see changes quicker in terminal logs
 
         telemetry = {
             "sensorId": "temp-sensor-001",
@@ -78,7 +83,7 @@ def main():
         reported = {"targetTemperature": TARGET_TEMPERATURE}
         client.patch_twin_reported_properties(reported)
 
-        time.sleep(5)
+        time.sleep(60)
 
 if __name__ == "__main__":
     main()
