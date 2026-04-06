@@ -10,7 +10,7 @@ load_dotenv()
 # Put your device connection string here (or use env var)
 DEVICE_CONNECTION_STRING = os.getenv("DEVICE_CONNECTION_STRING")
 
-TARGET_TEMPERATURE = 35.0  # Desired temperature
+TARGET_TEMPERATURE = 15.0  # Desired temperature
 CURRENT_TEMPERATURE = 35.0 # Current temperature of the device [Change to >28 to see cooling in action or <18 to see heating in action immediately in the terminal logs]
 
 # Create a client that can send telemetry and receive twin updates
