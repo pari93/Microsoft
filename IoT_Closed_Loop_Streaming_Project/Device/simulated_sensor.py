@@ -10,7 +10,7 @@ load_dotenv()
 # Put your device connection string here (or use env var)
 DEVICE_CONNECTION_STRING = os.getenv("DEVICE_CONNECTION_STRING")
 
-TARGET_TEMPERATURE = 24.0  # Desired temperature
+TARGET_TEMPERATURE = 35.0  # Desired temperature
 CURRENT_TEMPERATURE = 35.0 # Current temperature of the device [Change to >28 to see cooling in action or <18 to see heating in action immediately in the terminal logs]
 
 # Create a client that can send telemetry and receive twin updates
@@ -21,9 +21,19 @@ def create_client():
 # After receiving the new temperature set device's internal target temperature
 def handle_twin_patch(patch):
     global TARGET_TEMPERATURE
-    if "targetTemperature" in patch:
-        TARGET_TEMPERATURE = patch["targetTemperature"]
-        print(f"[DEVICE] New targetTemperature from cloud: {TARGET_TEMPERATURE}")
+
+    # Ignore patches that don't contain targetTemperature
+    if "targetTemperature" not in patch:
+        return
+
+    new_value = patch["targetTemperature"]
+
+    # Ignore repeated values
+    if new_value == TARGET_TEMPERATURE:
+        return
+
+    TARGET_TEMPERATURE = new_value
+    print(f"[DEVICE] New targetTemperature from cloud: {TARGET_TEMPERATURE}")
 
 def handle_direct_method(request):
     global TARGET_TEMPERATURE
@@ -59,17 +69,16 @@ def main():
 
     print("[DEVICE] Connected. Sending telemetry...")
 
-    start_time = time.time()
     while True:
-        if time.time() - start_time < 180:
-            CURRENT_TEMPERATURE += random.uniform(-0.1, 0.1)
+
+        # 1. If no targetTemperature has been received yet → hold steady
+        if TARGET_TEMPERATURE is None:
+            # Natural tiny drift only
+            CURRENT_TEMPERATURE += random.uniform(-0.5, 1.2)
+
+        # 2. If a targetTemperature has been received → move toward it
         else:
-            if TARGET_TEMPERATURE is not None:
-                # Move current temperature slowly toward target
-                CURRENT_TEMPERATURE += (TARGET_TEMPERATURE - CURRENT_TEMPERATURE) * 0.1
-            else:    
-                # No heating/cooling — natural drift only
-                CURRENT_TEMPERATURE += random.uniform(-0.2, 0.2) # Set it to (-5.0, 5.0) for more quicker fluctuations so see changes quicker in terminal logs
+            CURRENT_TEMPERATURE += (TARGET_TEMPERATURE - CURRENT_TEMPERATURE) * 0.1  # Adjust the 0.1 factor to control how quickly it moves toward the target
 
         telemetry = {
             "sensorId": "temp-sensor-001",

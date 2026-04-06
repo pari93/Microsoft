@@ -13,8 +13,8 @@ from azure.digitaltwins.core import DigitalTwinsClient
 
 app = func.FunctionApp()
 
-
-@app.schedule(schedule="*/30 * * * * *", arg_name="mytimer", run_on_startup=False, use_monitor=False)
+# Schedule format: {second} {minute} {hour} {day} {month} {day-of-week}
+@app.schedule(schedule="0 */5 * * * *", arg_name="mytimer", run_on_startup=False, use_monitor=False) # Every 5 minutes
 def ClosedLoopController(mytimer: func.TimerRequest) -> None:
     logging.info("ClosedLoopController triggered")
 
